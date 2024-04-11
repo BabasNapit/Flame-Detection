@@ -1,0 +1,41 @@
+#include <mega8535.h>
+#include <delay.h>
+#include <alcd.h>
+
+void main (void) {
+
+    unsigned int ADC;
+
+    DDRC = 0xff; //Output
+    PORTC = 0x00;
+    lcd_init (16);
+    ADMUX = 0x00; // Set input to ADC0
+    ADCSRA = 0x87; // Enable ADC with a prescaler of 128
+
+    while (1){
+        ADCSRA |= (1<<ADSC); // Start ADC conversion
+        while(ADCSRA & (1<<ADSC)); // Wait for conversion to complete
+        ADC = ADCL | (ADCH<<8); // Combine ADCL and ADCH to get ADC result
+
+        if (ADC > 900){
+            PORTC.0=0;
+            PORTC.1=0;
+            lcd_clear();
+            lcd_gotoxy(0,0);
+            lcd_putsf("PEMADAM API");
+            lcd_gotoxy(0,1);
+            lcd_putsf("TIDAK ADA API");
+            delay_ms(100);
+        }
+        else{
+            PORTC.0=1;
+            PORTC.1=1;
+            lcd_clear();
+            lcd_gotoxy(0,0);
+            lcd_putsf("PEMADAM API");
+            lcd_gotoxy(0,1);
+            lcd_putsf("ADA API");
+            delay_ms(100);
+        }
+    }
+}
